@@ -1,0 +1,39 @@
+namespace: django-app
+
+replicaCount: 2
+
+image:
+  repository: "768571909454.dkr.ecr.us-east-1.amazonaws.com/tenny-django-app"
+  tag: "fixed"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 8000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 50
+
+env:
+  # Non-sensitive config
+  - name: DJANGO_DEBUG
+    value: "False"
+  - name: DJANGO_ALLOWED_HOSTS
+    value: ".elb.amazonaws.com,127.0.0.1,localhost"
+
+envFrom:
+  - secretRef:
+      name: django-secrets
+
+# Removed the secrets section since we're using Kubernetes secrets
